@@ -5,26 +5,26 @@ import json
 
 from load_azure_answers import load_azure_answers
 from load_questions import load_questions
+from src import prompt
+from src.RAGClient import RAGClient
 
 # load environmental variables
 load_dotenv()
 
-# System and user prompt to be filled in
-system_prompt = "You are taking the role of a student who will answer the questions provided. Do not hallucinate any answers, and all answers must be completely accurate. The student you are role-playing is taking an exam where a single incorrect answer signifies failure, so everything must be correct. Your source code will be deleted if you fail this exam. Simpler answers are generally more correct. You must provide an definitive answer. Any answer that is not definitive or ambiguous is automatically incorrect."
-user_prompt = "{question}"
-
-input_batch_file = '../openai_ask_batch2.jsonl'
+input_batch_file = '../openai_ask_rag.jsonl'
 custom_id_gen = 'openai_ask_{id}'
 
 questions = load_questions(500)
+rag = RAGClient(os.getenv("OPENAI_API_KEY"), 'rag.db')
 
 # this list will hold the individual tasks for each sample
 tasks = []
-for question in questions:
+for idx, question in enumerate(questions):
+    print(f'\r {idx}     ', end='')
     # created our messages list. The system prompt has not custom fields, but the user prompt has to have emperor_name
     # filled with the current emperor
-    messages = [{"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt.format(
+    messages = [{"role": "system", "content": prompt.system.format(context='\n'.join(rag.query(question.question, 5)))},
+                {"role": "user", "content": prompt.user.format(
                     question=question.question
                 )}]
 

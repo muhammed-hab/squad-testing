@@ -11,12 +11,12 @@ from src.load_gpt_answers import load_gpt_answers
 load_dotenv()
 
 # System and user prompt to be filled in
-system_prompt = "You are a teacher tasked with determining whether a student’s answer to a question was correct, based on a set of possible correct answers. You must only use the provided possible correct answers to determine if the student's response was correct.\nYour response should only be a valid Json as shown below:\n{\"explanation\" (str): A short explanation of why the student's answer was correct or incorrect., \"score\" (bool): true if the student’s answer was correct, false if it was incorrect}"
+system_prompt = "You are a teacher tasked with determining whether a student’s answer to a question was correct, based on a set of possible correct answers. You must only use the provided possible correct answers to determine if the student's response was correct.\nYour response should only be a valid Json as shown below:\n{\"explanation\" (str): A short explanation of why the student's answer was correct or incorrect., \"score\" (bool): true if the student’s answer was correct, false if it was incorrect."
 user_prompt = "Question: {question}\n\nStudent's Response: {answer}\n\nPossible Correct Answers: {correct}\n\nYour Response:"
 
-answers = load_azure_answers('../azure_new.txt')
-# answers = load_gpt_answers()
-input_batch_file = '../azure_answers_batch.jsonl'
+answers = load_azure_answers('../azure_rag.txt')
+# answers = load_gpt_answers('../openai_ask.jsonl')
+input_batch_file = '../azure_score_rag_batch_4o_mini.jsonl'
 custom_id_gen = 'azure_{id}'
 
 questions = {question.id:question for question in load_questions(500)}
@@ -43,7 +43,7 @@ for ans in answers:
         "method": "POST",
         "url": "/v1/chat/completions",
         "body": {
-            "model": "gpt-4o",
+            "model": "gpt-4o-mini-2024-07-18",
             "response_format": {
             "type": "json_schema",
             "json_schema": {
